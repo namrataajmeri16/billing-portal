@@ -1,8 +1,15 @@
- Open docker desktop
- inside billing-portal
-    docker compose -f infra/docker-compose.yml up -d
 
-cd backend
+**Getting started**
+
+Clone the repository
+git clone <repo-url>
+cd billing-portal/backend
+
+npm i
+Create .env file
+Open docker desktop
+docker compose -f infra/docker-compose.yml up -d
+
     npm run dev
     npm prisma generate
     npm run db:seed
@@ -24,9 +31,9 @@ prisma\migrations/
 
 Your database is now in sync with your schema.
 
+**Explanation:**
 
-I added new model
-in schema.prisma file
+I added new model in schema.prisma file
 model WebhookEvent {
   id          String   @id              // provider event id
   type        String
