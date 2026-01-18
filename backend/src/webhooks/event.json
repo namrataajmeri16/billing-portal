@@ -1,0 +1,8 @@
+{
+  "id": "evt_test_001",
+  "type": "payment.succeeded",
+  "data": {
+    "invoiceId": "REAL_INVOICE_ID",
+    "amountCents": 1333
+  }
+}

@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+enum SubscriptionStatus {
+  active
+  past_due
+  canceled
+}
+
+enum InvoiceStatus {
+  draft
+  open
+  paid
+  failed
+}
+
+enum PaymentStatus {
+  processing
+  succeeded
+  failed
+}
+
+enum LedgerAccount {
+  CASH
+  ACCOUNTS_RECEIVABLE
+  DEFERRED_REVENUE
+  REVENUE
+}
+
+model LedgerEntry {
+  id          String        @id @default(uuid())
+  transactionId String
+  account     LedgerAccount
+  amountCents Int           // debit (+) / credit (-)
+  createdAt   DateTime      @default(now())
+}
+
+model InvoiceLineItem {
+  id            String   @id @default(uuid())
+  invoiceId     String
+  description   String
+  amountCents   Int      // +charge, -credit
+  createdAt     DateTime @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  subscriptions Subscription[]
+  invoices      Invoice[]
+  payments      Payment[]
+  UsageEvents   UsageEvent[]
+}
+
+model Plan {
+  code        String @id
+  name        String
+  amountCents Int
+  currency    String
+  interval    String
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id          String             @id @default(uuid())
+  customerId  String
+  planCode    String
+  status      SubscriptionStatus
+  periodStart DateTime
+  periodEnd   DateTime
+  cancelAt    DateTime?
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  plan     Plan     @relation(fields: [planCode], references: [code])
+}
+
+model Invoice {
+  id         String        @id @default(uuid())
+  customerId String
+  status     InvoiceStatus
+  totalCents Int
+  currency   String
+  dueAt      DateTime
+  createdAt  DateTime      @default(now())
+  subscriptionId String
+
+  customer Customer  @relation(fields: [customerId], references: [id])
+  payments Payment[]
+  InvoiceLineItem InvoiceLineItem[]
+  @@unique([subscriptionId, status])
+}
+
+model UsageEvent {
+  id         String   @id @default(uuid())
+  customerId String
+  quantity   Int
+  occurredAt DateTime
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  @@index([customerId, occurredAt])
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  customerId  String
+  invoiceId   String
+  status      PaymentStatus
+  amountCents Int
+  currency    String
+  createdAt   DateTime      @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  invoice  Invoice  @relation(fields: [invoiceId], references: [id])
+}
+
+model WebhookEvent {
+  id          String   @id              // provider event id
+  type        String
+  payload     Json
+  processedAt DateTime?
+  createdAt   DateTime @default(now())
+}
+
