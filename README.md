@@ -59,8 +59,12 @@ model WebhookEvent {
 output : {"received":true}
 
 see in
-    npx prisma studio. 
+
+    npx prisma studio.
+    
 There will be this row in webhookevent table.
-if you again run 
+
+if you run webhook again
+
     curl -X POST http://localhost:3000/webhooks   -H "Content-Type: application/json"   -H "x-signature: c9100425f79abe575891ae66d8739c87f58f32b19353f54e6ec9b60b6f2e9123"   --data-binary @event.json
 then also there will one row. This confirms idempotency.
