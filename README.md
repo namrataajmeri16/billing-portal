@@ -4,10 +4,12 @@
 Clone the repository
 
     git clone <repo-url>
+-----------------------------------------------------------------------
 
     cd billing-portal/backend
 
-npm i
+    npm i
+    
 Create .env file
 Open docker desktop
 docker compose -f infra/docker-compose.yml up -d
